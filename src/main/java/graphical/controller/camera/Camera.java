@@ -8,18 +8,34 @@ import com.badlogic.gdx.math.Vector3;
 
 public class Camera extends PerspectiveCamera implements InputProcessor {
 
+    private static final Vector3 BASE_VIEWPOINT = new Vector3(0, 0, 10);
     private final CameraInputController cameraInputController;
+    private final Vector3 focalPoint;
 
     public Camera() {
         super(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        this.focalPoint = new Vector3(0, 0, 0);
         this.near = 1;
         this.far = 100;
-        this.position.set(0, 0, 10);
-        lookAt(0, 0, 0);
+        this.position.set(BASE_VIEWPOINT);
         update();
 
         cameraInputController = new CameraInputController(this);
         Gdx.input.setInputProcessor(cameraInputController);
+    }
+
+    public void moveCameraPosition(Vector3 displacement) {
+        this.position.add(displacement);
+        this.focalPoint.add(displacement);
+        this.lookAt(focalPoint);
+    }
+
+    public void setFocalPoint(Vector3 focalPoint) {
+        this.focalPoint.set(focalPoint);
+
+        this.position.set(focalPoint);
+        this.position.sub(BASE_VIEWPOINT);
+
     }
 
     public CameraInputController getCameraInputController() {
@@ -63,7 +79,7 @@ public class Camera extends PerspectiveCamera implements InputProcessor {
             float deltaY = Gdx.input.getDeltaY();
 
             // rotate around object when dragging on x-axis
-            rotateAround(Vector3.Zero, Vector3.Y, deltaX);
+            rotateAround(focalPoint, Vector3.Y, deltaX);
 
             // move up and down when dragging on y-axis
             position.add(0, deltaY * 0.1f, 0);

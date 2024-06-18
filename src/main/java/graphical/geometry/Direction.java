@@ -17,4 +17,8 @@ public enum Direction {
             default -> throw new AssertionError("Unknown direction: " + direction);
         };
     }
+
+    public static Direction toValue(String direction) {
+        return Enum.valueOf(Direction.class, direction);
+    }
 }

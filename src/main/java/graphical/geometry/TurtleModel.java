@@ -5,12 +5,12 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 
-public class Turtle {
+public class TurtleModel {
 
     private final ModelInstance modelInstance;
     private final Direction direction;
 
-    public Turtle(Vector3 position, Direction direction) {
+    public TurtleModel(Vector3 position, Direction direction) {
         modelInstance = new ModelInstance(createModel());
         modelInstance.transform.translate(position);
         modelInstance.transform.rotate(Direction.toQuaternion(direction));
@@ -31,6 +31,6 @@ public class Turtle {
 
     public void move() {
         Quaternion quaternion = Direction.toQuaternion(direction);
-        modelInstance.transform.translate(quaternion.x, quaternion.y, quaternion.z);
+        modelInstance.transform.translate(quaternion.w, quaternion.y, quaternion.z);
     }
 }

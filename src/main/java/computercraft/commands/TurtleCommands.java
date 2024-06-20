@@ -3,37 +3,85 @@ package computercraft.commands;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import computercraft.server.TurtleWebSocketServer;
+import computercraft.turtle.Turtle;
+import graphical.geometry.Direction;
 import org.java_websocket.WebSocket;
 import util.GenericJsonConverter;
 
+import java.util.ArrayList;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
-public class TurtleCommands {
-    private final WebSocket webSocket;
-    private int commandId;
-    private final TurtleWebSocketServer server;
+public class TurtleCommands extends Commands {
+    private final ArrayList<Peripherals> peripherals;
+    private final Turtle turtle;
 
-    public TurtleCommands(WebSocket webSocket, TurtleWebSocketServer server) {
-        this.webSocket = webSocket;
-        this.server = server;
-        commandId = 0;
+    public TurtleCommands(WebSocket webSocket, TurtleWebSocketServer server, Turtle turtle) {
+        super(webSocket, server);
+        this.turtle = turtle;
+
+        peripherals = new ArrayList<>();
     }
 
     public boolean moveForward() {
         JsonNode response = sendCommand("turtle.forward()");
-        return GenericJsonConverter.convertToBoolean(response);
+        boolean success = GenericJsonConverter.convertToBoolean(response);
+
+        if (success) {
+            turtle.moveForward();
+        }
+        return success;
+    }
+
+    public boolean moveUp() {
+        JsonNode response = sendCommand("turtle.up()");
+        boolean success = GenericJsonConverter.convertToBoolean(response);
+
+        if (success) {
+            turtle.moveUp();
+        }
+        return success;
+    }
+
+    public boolean moveDown() {
+        JsonNode response = sendCommand("turtle.down()");
+        boolean success = GenericJsonConverter.convertToBoolean(response);
+
+        if (success) {
+            turtle.moveDown();
+        }
+        return success;
     }
 
     public boolean turnLeft() {
         JsonNode response = sendCommand("turtle.turnLeft()");
-        return GenericJsonConverter.convertToBoolean(response);
+        boolean success = GenericJsonConverter.convertToBoolean(response);
+
+        if (success) {
+            switch (turtle.getDirection()) {
+                case NORTH -> turtle.setDirection(Direction.WEST);
+                case EAST -> turtle.setDirection(Direction.NORTH);
+                case SOUTH -> turtle.setDirection(Direction.EAST);
+                case WEST -> turtle.setDirection(Direction.SOUTH);
+            }
+        }
+
+        return success;
     }
 
     public boolean turnRight() {
         JsonNode response = sendCommand("turtle.turnRight()");
-        return GenericJsonConverter.convertToBoolean(response);
+        boolean success = GenericJsonConverter.convertToBoolean(response);
+
+        if (success) {
+            switch (turtle.getDirection()) {
+                case NORTH -> turtle.setDirection(Direction.EAST);
+                case EAST -> turtle.setDirection(Direction.SOUTH);
+                case SOUTH -> turtle.setDirection(Direction.WEST);
+                case WEST -> turtle.setDirection(Direction.NORTH);
+            }
+        }
+
+        return success;
     }
 
     public Map<String, Object> inspect() {
@@ -41,15 +89,14 @@ public class TurtleCommands {
         return GenericJsonConverter.convertToMap(response);
     }
 
-
-    private JsonNode sendCommand(String command) {
-        CompletableFuture<JsonNode> completableFuture = server.sendCommandWithResponse(command, commandId++, webSocket);
-        try {
-            return completableFuture.get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException();
+    public boolean checkForPeripheral(Peripherals peripheral) {
+        JsonNode response = sendCommand(String.format("peripheral.find(\"%s\")", peripheral.getId()));
+        boolean peripheralExists = GenericJsonConverter.convertToBoolean(response);
+        if (peripheralExists) {
+            peripherals.add(peripheral);
         }
 
+        return peripheralExists;
     }
 }
 

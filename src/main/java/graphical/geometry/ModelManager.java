@@ -6,32 +6,36 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 import graphical.controller.camera.Camera;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class ModelManager {
-    private final ArrayList<ModelInstance> models;
+    private final Map<Vector3, ModelInstance> positionToModelMap;
     private final ModelBatch modelBatch;
     private final Camera camera;
 
     public ModelManager(Camera camera) {
         this.camera = camera;
         this.modelBatch = new ModelBatch();
-        this.models = new ArrayList<>();
+        this.positionToModelMap = new LinkedHashMap<>();
     }
 
     public void renderAllModels() {
         modelBatch.begin(camera);
-        modelBatch.render(models);
+        modelBatch.render(positionToModelMap.values());
         modelBatch.end();
     }
 
-    public List<ModelInstance> getModels() {
-        return models;
+    public Map<Vector3, ModelInstance> getPositionToModelMap() {
+        return positionToModelMap;
     }
 
-    public void addModel(ModelInstance modelInstance) {
-        models.add(modelInstance);
+    public void addModel(Vector3 position, ModelInstance modelInstance) {
+        positionToModelMap.put(position, modelInstance);
+    }
+
+    public void removeModelUsingPosition(Vector3 position) {
+        positionToModelMap.remove(position);
     }
 
     public void dispose() {
@@ -40,21 +44,16 @@ public class ModelManager {
 
     public void populateWithTestModels() {
         ModelInstance modelInstance = new CubeBuilder()
-                .setColor(Color.GREEN)
-                .setPosition(0, 0, 0)
+                .setColor(Color.BLUE)
+                .setPosition(0, -1, 0)
                 .create();
 
-        TurtleModel turtleModel = new TurtleModel(new Vector3(0, 0, 2), Direction.NORTH);
-        turtleModel.move();
-        turtleModel.move();
-
-        models.add(modelInstance);
-        models.add(turtleModel.getModelInstance());
+        positionToModelMap.put(new Vector3(0, -1, 0), modelInstance);
     }
 
     public TurtleModel createTurtleModel(Vector3 position, Direction direction) {
         TurtleModel turtleModel = new TurtleModel(position, direction);
-        models.add(turtleModel.getModelInstance());
+        positionToModelMap.put(position, turtleModel.getModelInstance());
         return turtleModel;
     }
 }

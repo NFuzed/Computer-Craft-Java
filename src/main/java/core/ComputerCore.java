@@ -15,6 +15,7 @@ public class ComputerCore extends ApplicationAdapter {
     public void create() {
         applicationContext = new ApplicationContext();
         applicationContext.getTurtleWebSocketServer().runOnNewThread();
+        applicationContext.getModelManager().populateWithTestModels();
     }
 
     @Override

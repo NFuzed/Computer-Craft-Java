@@ -2,20 +2,16 @@ package graphical.geometry;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 
 public class TurtleModel {
 
     private final ModelInstance modelInstance;
-    private final Direction direction;
 
     public TurtleModel(Vector3 position, Direction direction) {
         modelInstance = new ModelInstance(createModel());
         modelInstance.transform.translate(position);
         modelInstance.transform.rotate(Direction.toQuaternion(direction));
-
-        this.direction = direction;
     }
 
     private ModelInstance createModel() {
@@ -27,10 +23,5 @@ public class TurtleModel {
 
     public ModelInstance getModelInstance() {
         return modelInstance;
-    }
-
-    public void move() {
-        Quaternion quaternion = Direction.toQuaternion(direction);
-        modelInstance.transform.translate(quaternion.w, quaternion.y, quaternion.z);
     }
 }

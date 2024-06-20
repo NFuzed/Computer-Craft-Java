@@ -2,18 +2,19 @@ package util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 public class GenericJsonConverter {
 
     private GenericJsonConverter() {
-
     }
 
     public static Map<String, Object> convertToMap(JsonNode input) {
         return parseJsonNode(input);
+    }
+
+    public static List<Object> convertToArrayList(JsonNode input) {
+        return parseJsonArrayList(input);
     }
 
     public static boolean convertToBoolean(JsonNode jsonNode) {
@@ -36,6 +37,8 @@ public class GenericJsonConverter {
                 Map.Entry<String, JsonNode> field = fields.next();
                 resultMap.put(field.getKey(), parseJsonValue(field.getValue()));
             }
+        } else if (node.isArray()) {
+            resultMap.put("array", parseJsonArrayList(node));
         }
 
         return resultMap;
@@ -45,7 +48,7 @@ public class GenericJsonConverter {
         if (value.isObject()) {
             return parseJsonNode(value);
         } else if (value.isArray()) {
-            return parseJsonArray(value);
+            return parseJsonArrayList(value);
         } else if (value.isBoolean()) {
             return value.booleanValue();
         } else if (value.isNumber()) {
@@ -57,15 +60,13 @@ public class GenericJsonConverter {
         }
     }
 
-    private static Object parseJsonArray(JsonNode arrayNode) {
-        if (arrayNode.size() == 0) {
-            return new Object[0];
-        } else {
-            Object[] array = new Object[arrayNode.size()];
-            for (int i = 0; i < arrayNode.size(); i++) {
-                array[i] = parseJsonValue(arrayNode.get(i));
+    private static List<Object> parseJsonArrayList(JsonNode arrayNode) {
+        List<Object> arrayList = new ArrayList<>();
+        if (arrayNode.isArray()) {
+            for (JsonNode jsonNode : arrayNode) {
+                arrayList.add(parseJsonValue(jsonNode));
             }
-            return array;
         }
+        return arrayList;
     }
 }

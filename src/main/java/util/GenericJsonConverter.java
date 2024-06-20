@@ -1,31 +1,30 @@
 package util;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class GenericJsonToMapConverter {
+public class GenericJsonConverter {
 
-    public static void main(String[] args) {
-        String input = "{\"Apples\":3,\"Pears\":2}";
+    private GenericJsonConverter() {
 
-        try {
-            Map<String, Object> resultMap = convertToMap(input);
-            System.out.println(resultMap);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
-    public static Map<String, Object> convertToMap(String input) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readTree(input);
+    public static Map<String, Object> convertToMap(JsonNode input) {
+        return parseJsonNode(input);
+    }
 
-        return parseJsonNode(rootNode);
+    public static boolean convertToBoolean(JsonNode jsonNode) {
+        // Check if the JsonNode is an array and has at least one element
+        if (jsonNode.isArray() && !jsonNode.isEmpty()) {
+            // Get the first element of the array
+            JsonNode firstElement = jsonNode.get(0);
+            // Return the boolean value of the first element
+            return firstElement.asBoolean();
+        }
+        throw new IllegalArgumentException("JsonNode is not an array or is empty");
     }
 
     private static Map<String, Object> parseJsonNode(JsonNode node) {

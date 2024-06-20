@@ -1,7 +1,7 @@
 package core;
 
-import computercraft.TurtleManager;
 import computercraft.server.TurtleWebSocketServer;
+import computercraft.turtle.TurtleManager;
 import graphical.controller.camera.Camera;
 import graphical.geometry.ModelManager;
 

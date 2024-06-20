@@ -1,22 +1,24 @@
 package computercraft.server;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import computercraft.ConnectionInformation;
-import computercraft.TurtleManager;
+import com.fasterxml.jackson.databind.JsonNode;
+import computercraft.turtle.TurtleManager;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
-import util.GenericJsonToMapConverter;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class TurtleWebSocketServer extends WebSocketServer {
 
     private static final String HOST = "localhost";
     private static final int PORT = 8887;
     private final TurtleManager turtleManager;
+    private final Map<Integer, CompletableFuture<JsonNode>> commandResponseFutures = new ConcurrentHashMap<>();
 
 
     public TurtleWebSocketServer(TurtleManager turtleManager) {
@@ -27,8 +29,6 @@ public class TurtleWebSocketServer extends WebSocketServer {
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
         System.out.println("New connection from " + conn.getRemoteSocketAddress().getAddress().getHostAddress());
-
-        conn.send("turtle.inspect()");
     }
 
     @Override
@@ -37,31 +37,46 @@ public class TurtleWebSocketServer extends WebSocketServer {
     }
 
     @Override
-    public void onMessage(WebSocket conn, String message) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            if ("{}".equals(message)) {
-                System.out.println(message);
-                return;
-            }
+    public void onMessage(WebSocket conn, String value) {
+        Optional<Message> optionalMessage = MessageWrapper.unwrapMessage(value);
+        if (optionalMessage.isEmpty()) {
+            return;
+        }
 
-            ConnectionInformation msg = mapper.readValue(message, ConnectionInformation.class);
-            System.out.println("Action: " + msg.getAction());
-            System.out.println("Id: " + msg.getId());
+        Message message = optionalMessage.get();
+        System.out.println("Action: " + message.getAction());
+        System.out.println("Turtle Id: " + message.getTurtleId());
+        System.out.println("Command Id " + message.getCommandId());
 
-            if ("Connect".equals(msg.getAction())) {
-                turtleManager.addTurtle(msg, conn);
-            }
-
-        } catch (IOException e) {
-            try {
-                Map<String, Object> map = GenericJsonToMapConverter.convertToMap(message);
-                System.out.println(map);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
+        switch (message.getAction()) {
+            case ("Connect"):
+                turtleManager.addTurtle(message, conn, this);
+                break;
+            case ("Command Response"):
+                handleCommandResponse(message);
+                break;
+            default:
+                System.out.println("Invalid Action: " + message.getAction());
         }
     }
+
+    private void handleCommandResponse(Message message) {
+        CompletableFuture<JsonNode> future = commandResponseFutures.remove(message.getCommandId());
+        if (future != null) {
+            // Assuming the message has a field "success" that indicates the command result
+            future.complete(message.getContent());
+        }
+    }
+
+    public CompletableFuture<JsonNode> sendCommandWithResponse(String command, int commandId, WebSocket webSocket) {
+        CompletableFuture<JsonNode> future = new CompletableFuture<>();
+        commandResponseFutures.put(commandId, future);
+
+        sendCommand(command, commandId, webSocket);
+
+        return future;
+    }
+
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
@@ -77,5 +92,14 @@ public class TurtleWebSocketServer extends WebSocketServer {
 
     public void runOnNewThread() {
         new Thread(this).start();
+    }
+
+    public void sendCommand(String command, int commandId, WebSocket webSocket) {
+        Map<String, Object> mappedMessage = new HashMap<>();
+        mappedMessage.put("command", command);
+        mappedMessage.put("commandId", commandId);
+
+        Optional<String> optionalMessage = MessageWrapper.wrapMessage(mappedMessage);
+        optionalMessage.ifPresent(webSocket::send);
     }
 }

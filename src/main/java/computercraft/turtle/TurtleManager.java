@@ -41,7 +41,7 @@ public class TurtleManager {
             Direction direction = Direction.toValue((String) content.get("direction"));
 
             Turtle turtle = new Turtle(request.getMsg().getTurtleId(), position, direction, request.getConn(), request.getTurtleWebSocketServer());
-            modelManager.createTurtleModel(position, direction);
+            modelManager.createAndAddTurtleModel(position, direction);
             turtleMap.put(turtle.getId(), turtle);
         }
     }

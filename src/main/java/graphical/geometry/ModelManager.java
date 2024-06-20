@@ -20,7 +20,7 @@ public class ModelManager {
         this.positionToModelMap = new LinkedHashMap<>();
     }
 
-    public void renderAllModels() {
+    public void updateGraphics() {
         modelBatch.begin(camera);
         modelBatch.render(positionToModelMap.values());
         modelBatch.end();
@@ -46,14 +46,14 @@ public class ModelManager {
         ModelInstance modelInstance = new CubeBuilder()
                 .setColor(Color.BLUE)
                 .setPosition(0, -1, 0)
+                .setOpacity(0.5f)
                 .create();
 
         positionToModelMap.put(new Vector3(0, -1, 0), modelInstance);
     }
 
-    public TurtleModel createTurtleModel(Vector3 position, Direction direction) {
+    public void createAndAddTurtleModel(Vector3 position, Direction direction) {
         TurtleModel turtleModel = new TurtleModel(position, direction);
         positionToModelMap.put(position, turtleModel.getModelInstance());
-        return turtleModel;
     }
 }

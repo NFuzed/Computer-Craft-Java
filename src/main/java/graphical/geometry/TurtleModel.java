@@ -18,6 +18,7 @@ public class TurtleModel {
         return new CubeBuilder()
                 .setColor(Color.YELLOW)
                 .setPosition(0, 0, 0)
+                .setOpacity(1)
                 .create();
     }
 

@@ -6,11 +6,12 @@ import org.java_websocket.WebSocket;
 import util.GenericJsonConverter;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ScannerCommands extends Commands {
 
-    public ScannerCommands(WebSocket webSocket, TurtleWebSocketServer server) {
-        super(webSocket, server);
+    public ScannerCommands(AtomicInteger commandId, WebSocket webSocket, TurtleWebSocketServer server) {
+        super(commandId, webSocket, server);
     }
 
     public List<Object> scanBlocks(int range) {

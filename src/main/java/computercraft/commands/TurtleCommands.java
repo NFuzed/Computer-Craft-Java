@@ -10,13 +10,14 @@ import util.GenericJsonConverter;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class TurtleCommands extends Commands {
     private final ArrayList<Peripherals> peripherals;
     private final Turtle turtle;
 
-    public TurtleCommands(WebSocket webSocket, TurtleWebSocketServer server, Turtle turtle) {
-        super(webSocket, server);
+    public TurtleCommands(AtomicInteger commandId, WebSocket webSocket, TurtleWebSocketServer server, Turtle turtle) {
+        super(commandId, webSocket, server);
         this.turtle = turtle;
 
         peripherals = new ArrayList<>();

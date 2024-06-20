@@ -6,20 +6,21 @@ import org.java_websocket.WebSocket;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class Commands {
     private final WebSocket webSocket;
-    private int commandId;
+    private AtomicInteger commandId;
     private final TurtleWebSocketServer server;
 
-    protected Commands(WebSocket webSocket, TurtleWebSocketServer server) {
+    protected Commands(AtomicInteger commandId, WebSocket webSocket, TurtleWebSocketServer server) {
+        this.commandId = commandId;
         this.webSocket = webSocket;
         this.server = server;
-        commandId = 0;
     }
 
     JsonNode sendCommand(String command) {
-        CompletableFuture<JsonNode> completableFuture = server.sendCommandWithResponse(command, commandId++, webSocket);
+        CompletableFuture<JsonNode> completableFuture = server.sendCommandWithResponse(command, commandId.getAndAdd(1), webSocket);
         try {
             return completableFuture.get();
         } catch (InterruptedException | ExecutionException e) {

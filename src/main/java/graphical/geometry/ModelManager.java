@@ -31,6 +31,7 @@ public class ModelManager {
     public void updateGraphics() {
         modelBatch.begin(camera);
         modelBatch.render(blockModelMap.values());
+        modelBatch.render(turtleModelMap.values());
         flushDirtyModels();
         modelBatch.end();
     }
@@ -39,29 +40,16 @@ public class ModelManager {
         return new TurtleModel(position, direction);
     }
 
-    public void updateTurtleModelPosition(Vector3 oldPosition, Vector3 newPosition) {
-        ModelInstance modelInstance = blockModelMap.remove(oldPosition);
-        if (modelInstance == null) {
-            return;
-        }
-        modelInstance.transform.setTranslation(newPosition);
-        blockModelMap.put(newPosition, modelInstance);
-    }
-
     public void addTurtle(Turtle turtle) {
-        turtleModelMap.put(turtle, createAndAddTurtleModel(turtle.getPosition(), turtle.getDirection()).getModelInstance());
+
         dirtyTurtleQueue.add(turtle);
     }
 
     public void flushDirtyModels() {
         while (!dirtyTurtleQueue.isEmpty()) {
             Turtle turtle = dirtyTurtleQueue.poll();
-            ModelInstance modelInstance = turtleModelMap.get(turtle);
-
-            if (modelInstance == null) {
-                System.out.println("Model not found for turtle: " + turtle.getId());
-                continue;
-            }
+            ModelInstance modelInstance = turtleModelMap.computeIfAbsent(turtle,
+                    t -> createAndAddTurtleModel(t.getPosition(), t.getDirection()).getModelInstance());
 
             modelInstance.transform.setTranslation(turtle.getPosition());
         }

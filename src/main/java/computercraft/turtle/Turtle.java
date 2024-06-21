@@ -13,8 +13,6 @@ public class Turtle {
     private final CommandController commandController;
     private final Queue<Turtle> dirtyQueue;
     private final TurtleAttributes turtleAttributes;
-    private Direction direction;
-
     public Turtle(TurtleAttributes turtleAttributes, WebsocketInformation websocketInformation, Queue<Turtle> dirtyQueue) {
         this.turtleAttributes = turtleAttributes;
         this.commandController = new CommandController(websocketInformation, this);
@@ -37,7 +35,7 @@ public class Turtle {
     }
 
     public void moveForward() {
-        turtleAttributes.setPosition(turtleAttributes.getPosition().add(Direction.getDirectionAsVector(direction)));
+        turtleAttributes.setPosition(turtleAttributes.getPosition().add(Direction.getDirectionAsVector(turtleAttributes.getDirection())));
         dirtyQueue.add(this);
     }
 
@@ -56,7 +54,7 @@ public class Turtle {
     }
 
     public void setDirection(Direction direction) {
-        this.direction = direction;
+        turtleAttributes.setDirection(direction);
     }
 
     public Vector3 getPosition() {
@@ -64,7 +62,7 @@ public class Turtle {
     }
 
     public Direction getDirection() {
-        return direction;
+        return turtleAttributes.getDirection();
     }
 
     public CommandController getCommandController() {

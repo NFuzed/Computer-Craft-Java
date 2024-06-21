@@ -4,42 +4,67 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
+import computercraft.turtle.Turtle;
 import graphical.controller.camera.Camera;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ModelManager {
-    private final Map<Vector3, ModelInstance> positionToModelMap;
+    private final Map<Vector3, ModelInstance> blockModelMap;
     private final ModelBatch modelBatch;
     private final Camera camera;
+    private final ConcurrentLinkedQueue<Turtle> dirtyTurtleQueue;
+    private final LinkedHashMap<Turtle, ModelInstance> turtleModelMap;
 
     public ModelManager(Camera camera) {
         this.camera = camera;
         this.modelBatch = new ModelBatch();
-        this.positionToModelMap = new LinkedHashMap<>();
+        this.blockModelMap = new LinkedHashMap<>();
+        this.turtleModelMap = new LinkedHashMap<>();
+
+        this.dirtyTurtleQueue = new ConcurrentLinkedQueue<>();
     }
 
     public void updateGraphics() {
         modelBatch.begin(camera);
-        modelBatch.render(positionToModelMap.values());
+        modelBatch.render(blockModelMap.values());
+        flushDirtyModels();
         modelBatch.end();
     }
 
-    public Map<Vector3, ModelInstance> getPositionToModelMap() {
-        return positionToModelMap;
+    public TurtleModel createAndAddTurtleModel(Vector3 position, Direction direction) {
+        return new TurtleModel(position, direction);
     }
 
-    public void addModel(Vector3 position, ModelInstance modelInstance) {
-        positionToModelMap.put(position, modelInstance);
+    public void updateTurtleModelPosition(Vector3 oldPosition, Vector3 newPosition) {
+        ModelInstance modelInstance = blockModelMap.remove(oldPosition);
+        if (modelInstance == null) {
+            return;
+        }
+        modelInstance.transform.setTranslation(newPosition);
+        blockModelMap.put(newPosition, modelInstance);
     }
 
-    public void removeModelUsingPosition(Vector3 position) {
-        positionToModelMap.remove(position);
+    public void addTurtle(Turtle turtle) {
+        turtleModelMap.put(turtle, createAndAddTurtleModel(turtle.getPosition(), turtle.getDirection()).getModelInstance());
+        dirtyTurtleQueue.add(turtle);
     }
 
-    public void dispose() {
-        modelBatch.dispose();
+    public void flushDirtyModels() {
+        while (!dirtyTurtleQueue.isEmpty()) {
+            Turtle turtle = dirtyTurtleQueue.poll();
+            ModelInstance modelInstance = turtleModelMap.get(turtle);
+
+            if (modelInstance == null) {
+                System.out.println("Model not found for turtle: " + turtle.getId());
+                continue;
+            }
+
+            modelInstance.transform.setTranslation(turtle.getPosition());
+        }
     }
 
     public void populateWithTestModels() {
@@ -49,20 +74,15 @@ public class ModelManager {
                 .setOpacity(0.5f)
                 .create();
 
-        positionToModelMap.put(new Vector3(0, -1, 0), modelInstance);
+        blockModelMap.put(new Vector3(0, -1, 0), modelInstance);
     }
 
-    public void createAndAddTurtleModel(Vector3 position, Direction direction) {
-        TurtleModel turtleModel = new TurtleModel(position, direction);
-        positionToModelMap.put(position.cpy(), turtleModel.getModelInstance());
+    public Queue<Turtle> getDirtyTurtleQueue() {
+        return dirtyTurtleQueue;
     }
 
-    public void updateTurtleModelPosition(Vector3 oldPosition, Vector3 newPosition) {
-        ModelInstance modelInstance = positionToModelMap.remove(oldPosition);
-        if (modelInstance == null) {
-            return;
-        }
-        modelInstance.transform.setTranslation(newPosition);
-        positionToModelMap.put(newPosition, modelInstance);
+    public void dispose() {
+        modelBatch.dispose();
     }
+
 }

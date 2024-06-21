@@ -1,8 +1,7 @@
 package computercraft.commands;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import computercraft.server.TurtleWebSocketServer;
-import org.java_websocket.WebSocket;
+import computercraft.turtle.WebsocketInformation;
 import util.GenericJsonConverter;
 
 import java.util.List;
@@ -13,8 +12,8 @@ public class ScannerCommands extends Commands {
 
     private final CommandQueue commandQueue;
 
-    public ScannerCommands(CommandQueue commandQueue, AtomicInteger commandId, WebSocket webSocket, TurtleWebSocketServer server) {
-        super(commandId, webSocket, server);
+    public ScannerCommands(CommandQueue commandQueue, AtomicInteger commandId, WebsocketInformation websocketInformation) {
+        super(commandId, websocketInformation);
         this.commandQueue = commandQueue;
     }
 

@@ -2,10 +2,9 @@ package computercraft.commands;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
-import computercraft.server.TurtleWebSocketServer;
 import computercraft.turtle.Turtle;
+import computercraft.turtle.WebsocketInformation;
 import graphical.geometry.Direction;
-import org.java_websocket.WebSocket;
 import util.GenericJsonConverter;
 
 import java.util.Map;
@@ -16,8 +15,8 @@ public class TurtleCommands extends Commands {
     private final CommandQueue commandQueue;
     private final Turtle turtle;
 
-    public TurtleCommands(CommandQueue commandQueue, AtomicInteger commandId, WebSocket webSocket, TurtleWebSocketServer server, Turtle turtle) {
-        super(commandId, webSocket, server);
+    public TurtleCommands(CommandQueue commandQueue, AtomicInteger commandId, WebsocketInformation websocketInformation, Turtle turtle) {
+        super(commandId, websocketInformation);
         this.commandQueue = commandQueue;
         this.turtle = turtle;
     }

@@ -25,7 +25,7 @@ public class ComputerCore extends ApplicationAdapter {
 
         applicationContext.getCamera().getCameraInputController().update();
         applicationContext.getModelManager().updateGraphics();
-        applicationContext.getTurtleManager().update();
+        new Thread(() -> applicationContext.getTurtleManager().update()).start();
     }
 
     @Override

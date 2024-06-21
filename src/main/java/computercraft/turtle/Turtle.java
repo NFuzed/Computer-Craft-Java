@@ -8,26 +8,27 @@ import graphical.geometry.Direction;
 import graphical.geometry.TurtleModel;
 import org.java_websocket.WebSocket;
 
+import java.util.Queue;
+
 public class Turtle {
     private final int id;
     private final TurtleModel turtleModel;
     private final CommandController commandController;
+    private final Queue<TurtleUpdateInformation> updateQueue;
+    private final Vector3 position;
     private Direction direction;
-    private Vector3 position;
 
-    public Turtle(int id, Vector3 position, Direction direction, WebSocket webSocket, TurtleWebSocketServer server) {
+    public Turtle(int id, Vector3 position, Direction direction, WebSocket webSocket, TurtleWebSocketServer server, Queue<TurtleUpdateInformation> updateQueue) {
         this.id = id;
         this.position = position;
         this.direction = direction;
 
-        commandController = new CommandController(webSocket, server, this);
-        turtleModel = new TurtleModel(position, direction);
+        this.commandController = new CommandController(webSocket, server, this);
+        this.turtleModel = new TurtleModel(position, direction);
+        this.updateQueue = updateQueue;
 
         TurtleCommands turtleCommands = commandController.getTurtleCommands();
-
         turtleCommands.moveForward();
-        turtleCommands.moveForward();
-        turtleCommands.turnRight();
         turtleCommands.moveForward();
         turtleCommands.moveForward();
         turtleCommands.turnLeft();
@@ -36,8 +37,10 @@ public class Turtle {
     }
 
     public void moveForward() {
-        position.add(Direction.getDirectionAsVector(direction));
-        updateModel();
+        Vector3 oldPosition = position.cpy();
+        Vector3 newPosition = position.add(Direction.getDirectionAsVector(direction)).cpy();
+        TurtleUpdateInformation updateInformation = new TurtleUpdateInformation(oldPosition, newPosition);
+        updateQueue.add(updateInformation);
     }
 
     public void moveUp() {

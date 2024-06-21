@@ -54,6 +54,15 @@ public class ModelManager {
 
     public void createAndAddTurtleModel(Vector3 position, Direction direction) {
         TurtleModel turtleModel = new TurtleModel(position, direction);
-        positionToModelMap.put(position, turtleModel.getModelInstance());
+        positionToModelMap.put(position.cpy(), turtleModel.getModelInstance());
+    }
+
+    public void updateTurtleModelPosition(Vector3 oldPosition, Vector3 newPosition) {
+        ModelInstance modelInstance = positionToModelMap.remove(oldPosition);
+        if (modelInstance == null) {
+            return;
+        }
+        modelInstance.transform.setTranslation(newPosition);
+        positionToModelMap.put(newPosition, modelInstance);
     }
 }

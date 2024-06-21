@@ -16,11 +16,13 @@ public class TurtleManager {
     private final LinkedHashMap<Integer, Turtle> turtleMap;
     private final ModelManager modelManager;
     private final ConcurrentLinkedQueue<TurtleCreationRequest> creationQueue;
+    private final ConcurrentLinkedQueue<TurtleUpdateInformation> updateQueue;
 
     public TurtleManager(ModelManager modelManager) {
         turtleMap = new LinkedHashMap<>();
         this.modelManager = modelManager;
         creationQueue = new ConcurrentLinkedQueue<>();
+        updateQueue = new ConcurrentLinkedQueue<>();
     }
 
     public void addTurtle(Message msg, WebSocket conn, TurtleWebSocketServer turtleWebSocketServer) {
@@ -40,9 +42,13 @@ public class TurtleManager {
             Vector3 position = new Vector3(xPosition, yPosition, zPosition);
             Direction direction = Direction.toValue((String) content.get("direction"));
 
-            Turtle turtle = new Turtle(request.getMsg().getTurtleId(), position, direction, request.getConn(), request.getTurtleWebSocketServer());
+            Turtle turtle = new Turtle(request.getMsg().getTurtleId(), position, direction, request.getConn(), request.getTurtleWebSocketServer(), updateQueue);
             modelManager.createAndAddTurtleModel(position, direction);
             turtleMap.put(turtle.getId(), turtle);
+        }
+        while (!updateQueue.isEmpty()) {
+            TurtleUpdateInformation updateInformation = updateQueue.poll();
+            modelManager.updateTurtleModelPosition(updateInformation.oldPosition(), updateInformation.newPosition());
         }
     }
 }

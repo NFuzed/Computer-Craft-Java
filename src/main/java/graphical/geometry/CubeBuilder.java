@@ -31,6 +31,11 @@ public class CubeBuilder {
         return this;
     }
 
+    public CubeBuilder setPosition(Vector3 vector3) {
+        position = vector3.cpy();
+        return this;
+    }
+
     public ModelInstance create() {
         Material material = new Material();
         material.set(ColorAttribute.createDiffuse(color));

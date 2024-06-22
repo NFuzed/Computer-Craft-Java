@@ -20,7 +20,7 @@ public abstract class Commands {
         this.server = websocketInformation.getServer();
     }
 
-    JsonNode sendCommand(String command) {
+    public JsonNode sendCommand(String command) {
         CompletableFuture<JsonNode> completableFuture = server.sendCommandWithResponse(command, commandId.getAndAdd(1), webSocket);
         try {
             return completableFuture.get();

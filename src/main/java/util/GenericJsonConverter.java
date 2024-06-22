@@ -44,6 +44,16 @@ public class GenericJsonConverter {
         return resultMap;
     }
 
+    private static List<Object> parseJsonArrayList(JsonNode arrayNode) {
+        List<Object> arrayList = new ArrayList<>();
+        if (arrayNode.isArray()) {
+            for (JsonNode jsonNode : arrayNode) {
+                arrayList.add(parseJsonValue(jsonNode));
+            }
+        }
+        return arrayList;
+    }
+
     private static Object parseJsonValue(JsonNode value) {
         if (value.isObject()) {
             return parseJsonNode(value);
@@ -58,15 +68,5 @@ public class GenericJsonConverter {
         } else {
             return value.toString();
         }
-    }
-
-    private static List<Object> parseJsonArrayList(JsonNode arrayNode) {
-        List<Object> arrayList = new ArrayList<>();
-        if (arrayNode.isArray()) {
-            for (JsonNode jsonNode : arrayNode) {
-                arrayList.add(parseJsonValue(jsonNode));
-            }
-        }
-        return arrayList;
     }
 }

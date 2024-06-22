@@ -42,7 +42,7 @@ public class TurtleManager {
 
             TurtleAttributes turtleAttributes = new TurtleAttributes(request.getMsg().getTurtleId(), position, direction);
             WebsocketInformation websocketInformation = new WebsocketInformation(request.getConn(), request.getTurtleWebSocketServer());
-            Turtle turtle = new Turtle(turtleAttributes, websocketInformation, modelManager.getDirtyTurtleQueue());
+            Turtle turtle = new Turtle(turtleAttributes, websocketInformation, modelManager.getDirtyTurtleQueue(), modelManager.getBlocksToAddQueue());
 
             modelManager.addTurtle(turtle);
             turtleMap.put(turtle.getId(), turtle);

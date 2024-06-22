@@ -1,5 +1,6 @@
 package computercraft.commands;
 
+import computercraft.commands.peripherals.unlimitedperipherals.ScannerCommands;
 import computercraft.turtle.Turtle;
 import computercraft.turtle.WebsocketInformation;
 
@@ -10,10 +11,9 @@ public class CommandController {
     private final ScannerCommands scannerCommands;
 
     public CommandController(WebsocketInformation websocketInformation, Turtle turtle) {
-        CommandQueue commandQueue = new CommandQueue();
         AtomicInteger commandId = new AtomicInteger(0);
-        turtleCommands = new TurtleCommands(commandQueue, commandId, websocketInformation, turtle);
-        scannerCommands = new ScannerCommands(commandQueue, commandId, websocketInformation);
+        turtleCommands = new TurtleCommands(commandId, websocketInformation, turtle);
+        scannerCommands = new ScannerCommands(commandId, websocketInformation, turtle);
     }
 
     public TurtleCommands getTurtleCommands() {

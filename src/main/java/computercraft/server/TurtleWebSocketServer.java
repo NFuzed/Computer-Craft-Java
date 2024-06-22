@@ -44,9 +44,6 @@ public class TurtleWebSocketServer extends WebSocketServer {
         }
 
         Message message = optionalMessage.get();
-        System.out.println("Action: " + message.getAction());
-        System.out.println("Turtle Id: " + message.getTurtleId());
-        System.out.println("Command Id " + message.getCommandId());
 
         switch (message.getAction()) {
             case ("Connect"):

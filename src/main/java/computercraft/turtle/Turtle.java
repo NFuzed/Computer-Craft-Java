@@ -1,37 +1,31 @@
 package computercraft.turtle;
 
 import com.badlogic.gdx.math.Vector3;
+import computercraft.block.Block;
 import computercraft.commands.CommandController;
-import computercraft.commands.TurtleCommands;
 import graphical.geometry.Direction;
 
+import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 public class Turtle {
     private final CommandController commandController;
     private final Queue<Turtle> dirtyQueue;
     private final TurtleAttributes turtleAttributes;
-    public Turtle(TurtleAttributes turtleAttributes, WebsocketInformation websocketInformation, Queue<Turtle> dirtyQueue) {
+    private final Queue<Block> blocksToAdd;
+
+    public Turtle(TurtleAttributes turtleAttributes, WebsocketInformation websocketInformation, Queue<Turtle> dirtyQueue, Queue<Block> blocksToAdd) {
         this.turtleAttributes = turtleAttributes;
         this.commandController = new CommandController(websocketInformation, this);
         this.dirtyQueue = dirtyQueue;
+        this.blocksToAdd = blocksToAdd;
 
-        TurtleCommands turtleCommands = commandController.getTurtleCommands();
-        turtleCommands.moveForward();
-        turtleCommands.moveForward();
-        turtleCommands.moveForward();
-        turtleCommands.turnLeft();
-        turtleCommands.moveForward();
-        Future<Boolean> booleanFuture = turtleCommands.moveForward();
+        commandController.getScannerCommands().scanBlocks(8);
 
-        try {
-            System.out.println(booleanFuture.get());
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
+    }
 
+    public void addBlocksToGraphics(List<Block> unconvertedBlocksMap) {
+        blocksToAdd.addAll(unconvertedBlocksMap);
     }
 
     public void moveForward() {

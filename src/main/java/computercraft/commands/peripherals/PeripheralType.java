@@ -1,11 +1,11 @@
-package computercraft.commands;
+package computercraft.commands.peripherals;
 
-public enum Peripherals {
+public enum PeripheralType {
     UNIVERSAL_SCANNER("universal_scanner");
 
     private String id;
 
-    Peripherals(String id) {
+    PeripheralType(String id) {
         this.id = id;
     }
 

@@ -1,6 +1,7 @@
 package computercraft.commands;
 
 
+import com.badlogic.gdx.math.Vector3;
 import com.fasterxml.jackson.databind.JsonNode;
 import computercraft.turtle.Turtle;
 import computercraft.turtle.WebsocketInformation;
@@ -18,12 +19,18 @@ public class TurtleCommands extends Commands {
         this.turtle = turtle;
     }
 
+    public boolean dig() {
+        JsonNode response = sendCommand("turtle.dig()");
+        return GenericJsonConverter.convertToBoolean(response);
+    }
+
     public boolean moveForward() {
             JsonNode response = sendCommand("turtle.forward()");
             boolean success = GenericJsonConverter.convertToBoolean(response);
 
             if (success) {
-                turtle.moveForward();
+                turtle.movePosition(Direction.getDirectionAsVector(turtle.getDirection()));
+                turtle.getDirtyQueue().add(turtle);
             }
             return success;
     }
@@ -33,7 +40,8 @@ public class TurtleCommands extends Commands {
             boolean success = GenericJsonConverter.convertToBoolean(response);
 
             if (success) {
-                turtle.moveUp();
+                turtle.movePosition(new Vector3(0, 1, 0));
+                turtle.getDirtyQueue().add(turtle);
             }
             return success;
     }
@@ -43,7 +51,8 @@ public class TurtleCommands extends Commands {
             boolean success = GenericJsonConverter.convertToBoolean(response);
 
             if (success) {
-                turtle.moveDown();
+                turtle.movePosition(new Vector3(0, -1, 0));
+                turtle.getDirtyQueue().add(turtle);
             }
             return success;
     }

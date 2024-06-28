@@ -1,5 +1,6 @@
 package computercraft.commands.peripherals.unlimitedperipherals;
 
+import com.badlogic.gdx.math.Vector3;
 import com.fasterxml.jackson.databind.JsonNode;
 import computercraft.block.Block;
 import computercraft.commands.Commands;
@@ -23,24 +24,26 @@ public class ScannerCommands extends Commands {
     }
 
     public List<Block> scanBlocks(int range) {
+        String command =
+                String.format("local scanner = peripheral.find('%s')%n", PeripheralType.UNIVERSAL_SCANNER.getId()) +
+                        String.format("local result = scanner.scan('block', %s)%n", range) +
+                        "local filtered_result = {}\n" +
+                        "for _, v in pairs(result) do\n" +
+                        "    table.insert(filtered_result, {x = v.x, y = v.y, z = v.z, displayName = v.displayName})\n" +
+                        "end\n" +
+                        "return filtered_result";
 
-//            if (!peripherals.contains(Peripherals.UNIVERSAL_SCANNER)){
-//                System.out.println("Cannot execute command - Universal Scanner not detected");
-//                return Collections.emptyMap();
-//            }
-
-        String command = String.format("peripheral.find(\"%s\").scan(\"%s\", %s)", PeripheralType.UNIVERSAL_SCANNER.getId(), "block", range);
         JsonNode response = sendCommand(command);
         List<Object> unconvertedMaps = GenericJsonConverter.convertToArrayList(response);
 
         List<Block> blocks = unconvertedMaps.stream()
                 .map(obj -> (List<Map<String, Object>>) obj)
                 .flatMap(Collection::stream)
-                .map(map -> new Block(map, turtle.getPosition()))
+                .map(map -> new Block(map, turtle.getPosition(), turtle.getDirection()))
+                .filter(block -> !new Vector3(block.getX(), block.getY(), block.getZ()).equals(turtle.getPosition()))
                 .toList();
 
-        turtle.addBlocksToGraphics(blocks);
-
+        turtle.getBlocksToAdd().addAll(blocks);
         return blocks;
     }
 }

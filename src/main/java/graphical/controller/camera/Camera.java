@@ -5,12 +5,16 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.math.Vector3;
+import computercraft.turtle.Turtle;
+import util.observer.Observer;
 
 public class Camera extends PerspectiveCamera implements InputProcessor {
 
     private static final Vector3 BASE_VIEWPOINT = new Vector3(0, 0, 10);
     private final CameraInputController cameraInputController;
     private final Vector3 focalPoint;
+    private Turtle turtle;
+    private Observer<Vector3> moveCameraPosition;
 
     public Camera() {
         super(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -21,13 +25,21 @@ public class Camera extends PerspectiveCamera implements InputProcessor {
         update();
 
         cameraInputController = new CameraInputController(this);
+        moveCameraPosition = this::moveCameraPosition;
         Gdx.input.setInputProcessor(cameraInputController);
     }
 
+    public void setTurtleView(Turtle turtle) {
+        if (this.turtle != null) {
+            this.turtle.removeObserver(moveCameraPosition);
+        }
+        this.turtle = turtle;
+        turtle.addObserver(moveCameraPosition);
+    }
+
     public void moveCameraPosition(Vector3 displacement) {
-        this.position.add(displacement);
-        this.focalPoint.add(displacement);
-        this.lookAt(focalPoint);
+//        this.translate(displacement);
+        this.lookAt(focalPoint.add(displacement));
     }
 
     public void setFocalPoint(Vector3 focalPoint) {

@@ -19,4 +19,12 @@ public class WebsocketInformation {
     public TurtleWebSocketServer getServer() {
         return server;
     }
+
+    public void setWebSocket(WebSocket webSocket) {
+        this.webSocket = webSocket;
+    }
+
+    public void setServer(TurtleWebSocketServer server) {
+        this.server = server;
+    }
 }

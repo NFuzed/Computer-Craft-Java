@@ -4,43 +4,25 @@ import com.badlogic.gdx.math.Vector3;
 import computercraft.block.Block;
 import computercraft.commands.CommandController;
 import graphical.geometry.Direction;
+import util.observer.Observable;
 
-import java.util.List;
 import java.util.Queue;
 
-public class Turtle {
+public class Turtle extends Observable<Vector3> {
     private final CommandController commandController;
     private final Queue<Turtle> dirtyQueue;
     private final TurtleAttributes turtleAttributes;
     private final Queue<Block> blocksToAdd;
+    private final WebsocketInformation websocketInformation;
 
     public Turtle(TurtleAttributes turtleAttributes, WebsocketInformation websocketInformation, Queue<Turtle> dirtyQueue, Queue<Block> blocksToAdd) {
         this.turtleAttributes = turtleAttributes;
+        this.websocketInformation = websocketInformation;
         this.commandController = new CommandController(websocketInformation, this);
         this.dirtyQueue = dirtyQueue;
         this.blocksToAdd = blocksToAdd;
 
-        commandController.getScannerCommands().scanBlocks(8);
 
-    }
-
-    public void addBlocksToGraphics(List<Block> unconvertedBlocksMap) {
-        blocksToAdd.addAll(unconvertedBlocksMap);
-    }
-
-    public void moveForward() {
-        turtleAttributes.setPosition(turtleAttributes.getPosition().add(Direction.getDirectionAsVector(turtleAttributes.getDirection())));
-        dirtyQueue.add(this);
-    }
-
-    public void moveUp() {
-        turtleAttributes.setPosition(turtleAttributes.getPosition().add(new Vector3(0, 1, 0)));
-        dirtyQueue.add(this);
-    }
-
-    public void moveDown() {
-        turtleAttributes.setPosition(turtleAttributes.getPosition().add(new Vector3(0, -1, 0)));
-        dirtyQueue.add(this);
     }
 
     public Integer getId() {
@@ -55,12 +37,35 @@ public class Turtle {
         return turtleAttributes.getPosition();
     }
 
+    public void movePosition(Vector3 translation) {
+        turtleAttributes.setPosition(turtleAttributes.getPosition().add(translation));
+        notifyObservers(translation);
+    }
+
     public Direction getDirection() {
         return turtleAttributes.getDirection();
     }
 
+    public Queue<Turtle> getDirtyQueue() {
+        return dirtyQueue;
+    }
+
+    public Queue<Block> getBlocksToAdd() {
+        return blocksToAdd;
+    }
+
     public CommandController getCommandController() {
         return commandController;
+    }
+
+    public void setWebsocketInformation(WebsocketInformation websocketInformation) {
+        this.websocketInformation.setWebSocket(websocketInformation.getWebSocket());
+        this.websocketInformation.setServer(websocketInformation.getServer());
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(getId());
     }
 }
 
